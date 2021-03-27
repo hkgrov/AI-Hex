@@ -52,7 +52,7 @@ class Game:
 
 
     def ai_play(self):
-        test = Mcts(self.stateman, self.current_state, 100000)
+        test = Mcts(self.stateman, self.current_state, 2000)
         test.run()
         #tree_plot(test.current_state)
 

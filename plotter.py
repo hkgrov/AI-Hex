@@ -14,7 +14,7 @@ class decision_tree_plot():
     def create_decision_tree(self, state, name, ascii_value, next_level_value):
         level_value = next_level_value
         next_level_value = next_level_value
-        self.dot.node(name, str(state.total_wins) + " / " + str(state.num_visits))
+        self.dot.node(name, str(state.action) + "\n" + str(state.total_wins) + " / " + str(state.num_visits))
         queue = state.children.copy()
 
         while queue:

@@ -61,7 +61,15 @@ class Board:
     def draw_line(self, arr):
         pygame.draw.lines(self.screen, OFF_WHITE, False, arr, 1)
 
+    def auto_place_tile(self, action, player):
+        pos1 = int(action / self.board_size)
+        pos2 = action - (pos1 * self.board_size)
+        pos = self.dot_positions[pos1][pos2]
+        self.draw_circle(pos, COLORS[player])
+        pygame.display.update()
+        print(pos1, pos2)
     
+
     def place_tile(self, color):
         pos = pygame.mouse.get_pos()
         click = self.screen.get_at(pos) == WHITE

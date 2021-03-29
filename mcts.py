@@ -45,7 +45,7 @@ class Mcts:
             new_grid = current_state.grid.copy()
             #print(action)
             new_grid[action] = current_state.player
-            new_state = State(new_grid, current_state.player*-1, current_state)
+            new_state = State(new_grid, current_state.player*-1, current_state, action)
             current_state.add_child(new_state)
 
         self.rollout(new_state)
@@ -82,3 +82,11 @@ class Mcts:
     def run(self):
         for i in range(self.simulations):
             self.tree_policy(self.current_state)
+
+        num_visits = []
+        for child in self.current_state.children:
+            num_visits.append(child.num_visits + child.total_wins/self.simulations)
+        indeks = num_visits.index(max(num_visits))
+        print(num_visits)
+
+        return self.current_state.children[indeks].action

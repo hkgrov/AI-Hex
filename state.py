@@ -2,7 +2,7 @@ import numpy as np
 from random import randint
 
 class State:
-    def __init__(self, grid, player, parent, rollout = False):
+    def __init__(self, grid, player, parent, action = None, rollout = False):
         #An array consisting of all places on the board and if they are taken by a player (1 / -1)
         self.grid = grid
         #The player that should take the next move
@@ -11,7 +11,7 @@ class State:
         self.parent_state = parent
         self.children = []
         self.rollout = rollout
-
+        self.action = action
         self.num_visits = 0
         self.total_wins = 0
 

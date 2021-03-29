@@ -52,9 +52,15 @@ class Game:
 
 
     def ai_play(self):
-        test = Mcts(self.stateman, self.current_state, 2000)
-        test.run()
-        #tree_plot(test.current_state)
+        while not self.stateman.is_terminal(self.n_x_n, self.current_player*-1):
+            test = Mcts(self.stateman, self.current_state, 20000)
+            action = test.run()
+            print(action)
+            self.n_x_n[action] = self.current_player
+            self.board.auto_place_tile(action, self.current_player)
+            self.current_player *= -1
+            self.current_state = State(self.n_x_n, self.current_player, self.current_state)
+        tree_plot(test.current_state)
 
 
 

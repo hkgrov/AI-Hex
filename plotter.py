@@ -7,6 +7,7 @@ class decision_tree_plot():
         self.dot.attr(ranksep="2")
         self.ascii_value = 65
         self.edges = set()
+        self.root = state
         self.create_decision_tree(state, chr(self.ascii_value), self.ascii_value + 1, 0)
         
 
@@ -27,7 +28,7 @@ class decision_tree_plot():
             next_level_value = self.create_decision_tree(child, new_name, ascii_value + 1, next_level_value)
             level_value += 1
         
-        if state.parent_state == None:
+        if state == self.root:
             #self.dot.edges(self.edges)
             for ele in self.edges:
                 nodes = ele.split(",")
@@ -36,5 +37,4 @@ class decision_tree_plot():
             #print(self.dot)
             #print(self.edges)
             self.dot.render()
-        
         return level_value

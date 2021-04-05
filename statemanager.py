@@ -63,14 +63,15 @@ class Stateman:
             if(grid[i] == player):
                 explore.append(i)
         
+        
         while len(explore) != 0:
             current_node = explore.pop()
-            if(current_node in end_indices):
+            if(current_node in visited):
+                continue
+            elif(current_node in end_indices):
                 #print("The winner is player: " + str(player))
                 return True
             
-            if(current_node in visited):
-                continue
             for neigh in self.neighbors[current_node]:
                 if(grid[neigh] == player):
                     explore.append(neigh)
@@ -82,11 +83,12 @@ class Stateman:
 
     
     def get_available_actions(self, grid):
-        return np.where(np.array(grid) == 0)
+        return [v for v in range(len(grid)) if grid[v] == 0]
+        #return np.where(np.array(grid) == 0)
 
     
     def get_random_move(self, grid):
-        available_actions = self.get_available_actions(grid)[0]
+        available_actions = self.get_available_actions(grid)
         random_move = randint(0,len(available_actions)-1)
         action = available_actions[random_move]
         return action

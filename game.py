@@ -17,11 +17,15 @@ COLORS = [WHITE, GREEN, LIGHT_BLUE, BLUE, RED]
 PLAYER_COLORS = [GREEN, RED]
 
 class Game:
-    def __init__(self, size = 4, play_type = 2, start_player = 1):
+    def __init__(self, size = 4, play_type = 2, start_player = 1, plotter = True, simulations = 1000):
         self.board = Board(size)
+        self.simulations = simulations
+        self.plotter = plotter
         self.size = size
         self.current_player = start_player
         self.n_x_n = [0]*(size*size)
+        #self.n_x_n = np.zeros(size*size)
+        print(self.n_x_n)
         #self.game_state_board = [-1, -1, 1, 1, -1, -1, 1, 0, 0, 1, 1, -1, 0, -1, 1, 1]
         #self.board.draw_game_state(self.game_state_board)
         self.current_state = State(self.n_x_n, start_player, None)
@@ -53,14 +57,16 @@ class Game:
 
     def ai_play(self):
         while not self.stateman.is_terminal(self.n_x_n, self.current_player*-1):
-            test = Mcts(self.stateman, self.current_state, 20000)
-            action = test.run()
-            print(action)
-            self.n_x_n[action] = self.current_player
-            self.board.auto_place_tile(action, self.current_player)
+            test = Mcts(self.stateman, self.current_state, self.simulations)
+            new_state = test.run()
+            print(new_state.action)
+            self.n_x_n[new_state.action] = self.current_player
+            self.board.auto_place_tile(new_state.action, self.current_player)
             self.current_player *= -1
-            self.current_state = State(self.n_x_n, self.current_player, self.current_state)
-        tree_plot(test.current_state)
+            self.current_state = new_state
+        
+        if(self.plotter):
+            tree_plot(test.current_state)
 
 
 

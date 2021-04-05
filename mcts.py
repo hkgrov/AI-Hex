@@ -13,35 +13,40 @@ class Mcts:
         while(current_state.children):
             next_state = self.selection(current_state)
             current_state = next_state
-        
+
         if(current_state.rollout):
             self.expansion(current_state)
         else:
             self.rollout(current_state)
 
     def selection(self, state):
-        poss_next_state = []
+        #poss_next_state = np.empty(len(state.children))
+        poss_next_state = [0]*len(state.children)
+        pos = 0
 
         for child in state.children:
-            #print(child)
             if(child.num_visits == 0):
                 return child
             
             else:
                 if(state.player == 1):
-                    poss_next_state.append(((child.total_wins/child.num_visits) + (4 * sqrt((log(state.num_visits))/(1+child.num_visits)))))
+                    poss_next_state[pos] = ((child.total_wins/child.num_visits) + (4 * sqrt((log(state.num_visits))/(1+child.num_visits))))
                 elif(state.player == -1):
-                    poss_next_state.append(((child.total_wins/child.num_visits) - (4 * sqrt((log(state.num_visits))/(1+child.num_visits)))))
-                             
+                    poss_next_state[pos] = ((child.total_wins/child.num_visits) - (4 * sqrt((log(state.num_visits))/(1+child.num_visits))))
+            
+            pos+=1
+                            
         if(state.player == 1):
-            next_state = state.children[np.argmax(np.array(poss_next_state))]
+            next_state = state.children[poss_next_state.index(max(poss_next_state))]
+            #next_state = state.children[np.argmax(poss_next_state)]
         elif(state.player == -1):
-            next_state = state.children[np.argmin(np.array(poss_next_state))]
+            next_state = state.children[poss_next_state.index(min(poss_next_state))]
+            #next_state = state.children[np.argmin(poss_next_state)]
         return next_state
 
     def expansion(self, current_state):
-        actions = current_state.get_available_actions()
-        for action in actions[0]:
+        actions = current_state.get_available_actions()[0]
+        for action in actions:
             new_grid = current_state.grid.copy()
             #print(action)
             new_grid[action] = current_state.player
@@ -57,7 +62,7 @@ class Mcts:
         current_state.change_rollout()
 
         while not self.stateman.is_terminal(rollout_grid, rollout_player*-1):
-            if(len(self.stateman.get_available_actions(rollout_grid)[0])) == 0:
+            if(len(self.stateman.get_available_actions(rollout_grid))) == 0:
                 self.backprop(0, current_state)
                 return
             action = self.stateman.get_random_move(rollout_grid)
@@ -89,4 +94,4 @@ class Mcts:
         indeks = num_visits.index(max(num_visits))
         print(num_visits)
 
-        return self.current_state.children[indeks].action
+        return self.current_state.children[indeks]

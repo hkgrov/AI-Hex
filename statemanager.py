@@ -53,12 +53,16 @@ class Stateman:
         for i in range(self.board_size*self.board_size):
             self.neighbors[i] = (self.intersection(allowed_neighbors, neighbors[i]))
 
-    def is_terminal(self, grid, player):
+    def is_terminal(self, grid, player, num_moves = 2):
+        if(num_moves > self.board_size**2 - (2*self.board_size - 1)):
+            return False
         start_indices, end_indices = self.indices[player]
         explore = []
         visited = []
         
-        
+        if not [v for v in end_indices if grid[v] == player]:
+            return False
+
         for i in start_indices:
             if(grid[i] == player):
                 explore.append(i)

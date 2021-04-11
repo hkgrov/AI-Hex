@@ -22,11 +22,12 @@ class State:
 
     
     def get_available_actions(self):
-        return np.where(np.array(self.grid) == 0)
+        return [v for v in range(len(self.grid)) if self.grid[v] == 0]
+        #return np.where(np.array(self.grid) == 0)
 
     
     def get_random_move(self):
-        available_actions = self.get_available_actions()[0]
+        available_actions = self.get_available_actions()
         random_move = randint(0,len(available_actions)-1)
         action = available_actions[random_move]
         return action

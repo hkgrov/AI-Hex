@@ -17,7 +17,7 @@ class Mcts:
         if(current_state.rollout):
             self.expansion(current_state)
         else:
-            self.rollout(current_state)
+            self.rollout(current_state, len(start_state.children) - 1)
 
     def selection(self, state):
         #poss_next_state = np.empty(len(state.children))
@@ -38,36 +38,39 @@ class Mcts:
                             
         if(state.player == 1):
             next_state = state.children[poss_next_state.index(max(poss_next_state))]
-            #next_state = state.children[np.argmax(poss_next_state)]
         elif(state.player == -1):
             next_state = state.children[poss_next_state.index(min(poss_next_state))]
-            #next_state = state.children[np.argmin(poss_next_state)]
         return next_state
 
     def expansion(self, current_state):
-        actions = current_state.get_available_actions()[0]
+        actions = current_state.get_available_actions()
+        if self.stateman.is_terminal(current_state.grid, current_state.player, len(actions)):
+            self.backprop(current_state.player, current_state)
+            return
+        if not actions:
+            self.backprop(0, current_state)
+            return
         for action in actions:
             new_grid = current_state.grid.copy()
-            #print(action)
             new_grid[action] = current_state.player
             new_state = State(new_grid, current_state.player*-1, current_state, action)
             current_state.add_child(new_state)
-
-        self.rollout(new_state)
+        self.rollout(new_state, len(actions))
         
 
-    def rollout(self, current_state):
+    def rollout(self, current_state, num_actions):
         rollout_grid = current_state.grid.copy()
         rollout_player = current_state.player
         current_state.change_rollout()
 
-        while not self.stateman.is_terminal(rollout_grid, rollout_player*-1):
+        while not self.stateman.is_terminal(rollout_grid, rollout_player*-1, num_actions):
             if(len(self.stateman.get_available_actions(rollout_grid))) == 0:
                 self.backprop(0, current_state)
                 return
             action = self.stateman.get_random_move(rollout_grid)
             rollout_grid[action] = rollout_player
             rollout_player *= -1
+            num_actions -= 1
         #print(rollout_grid)
 
         

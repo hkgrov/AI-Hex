@@ -17,7 +17,7 @@ COLORS = [WHITE, GREEN, LIGHT_BLUE, BLUE, RED]
 PLAYER_COLORS = [GREEN, RED]
 
 class Game:
-    def __init__(self, size = 4, play_type = 2, start_player = 1, plotter = True, simulations = 1000):
+    def __init__(self, size = 10, play_type = 1, start_player = 1, plotter = True, simulations = 1000):
         self.board = Board(size)
         self.simulations = simulations
         self.plotter = plotter

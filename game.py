@@ -6,6 +6,7 @@ from statemanager import Stateman
 from mcts import Mcts
 from plotter import decision_tree_plot as tree_plot
 from neural_network import hex_neural_network
+import csv
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -18,27 +19,20 @@ COLORS = [WHITE, GREEN, LIGHT_BLUE, BLUE, RED]
 PLAYER_COLORS = [GREEN, RED]
 
 class Game:
-    def __init__(self, size = 10, play_type = 1, start_player = 1, plotter = True, simulations = 1000):
+    def __init__(self, size = 10, play_type = 1, start_player = 1, plotter = True, simulations = 1000, visualization = True):
         self.train_x = []
         self.train_y = []
-        self.board = Board(size)
+        self.visualization = visualization
+        if visualization:
+            self.board = Board(size)
         self.simulations = simulations
         self.plotter = plotter
         self.size = size
         self.current_player = start_player
         self.n_x_n = [0]*(size*size)
-        #self.n_x_n = np.zeros(size*size)
-        print(self.n_x_n)
-        #self.game_state_board = [-1, -1, 1, 1, -1, -1, 1, 0, 0, 1, 1, -1, 0, -1, 1, 1]
-        #self.board.draw_game_state(self.game_state_board)
         self.current_state = State(self.n_x_n, start_player, None)
         self.current_state.change_rollout()
         self.stateman = Stateman(state = self.current_state, size = size, grid = self.n_x_n, player = start_player)
-        if play_type == 1:
-            self.manual_play()
-        
-        if play_type == 2:
-            self.ai_play()
 
 
     def manual_play(self):
@@ -68,7 +62,8 @@ class Game:
             
             print(new_state.action)
             #self.n_x_n[new_state.action] = self.current_player
-            self.board.auto_place_tile(new_state.action, self.current_player)
+            if self.visualization:
+                self.board.auto_place_tile(new_state.action, self.current_player)
             self.current_player *= -1
             self.current_state = new_state
         
@@ -77,13 +72,68 @@ class Game:
             print(str(self.train_x[i]) + " = " + str(self.train_y[i]))
 
 
-        model = hex_neural_network(self.train_x, self.train_y, len(self.n_x_n))
+        model = hex_neural_network(np.array(self.train_x), np.array(self.train_y), len(self.n_x_n))
+        model.train()
+
+        if(self.plotter):
+            tree_plot(test.current_state)
+
+    def create_dataset(self, number_of_games):
+        root_state = self.current_state
+        root_player = self.current_player
+        for i in range(number_of_games):
+            while not self.stateman.is_terminal(self.current_state.grid, self.current_player*-1):
+                mcts_runner = Mcts(self.stateman, self.current_state, self.simulations)
+                self.train_x.append(self.current_state.grid)
+
+                new_state, train_y = mcts_runner.run()
+                self.train_y.append(train_y)
+
+                self.current_player *= -1
+                self.current_state = new_state
+            
+            self.reset_game(root_state, root_player)
+
+        with open("hex_dataset_x.csv", "a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(self.train_x)
+
+        with open("hex_dataset_y.csv", "a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerows(self.train_y)
+        
+        tree_plot(root_state)
+
+
+        
+
+    def train_neural_network(self, number_of_games):
+        for i in range(number_of_games):
+            while not self.stateman.is_terminal(self.current_state.grid, self.current_player*-1):
+                mcts_runner = Mcts(self.stateman, self.current_state, self.simulations)
+                self.train_x.append(self.current_state.grid)
+
+                new_state, train_y = test.run()
+                self.train_y.append(train_y)
+
+                self.current_player *= -1
+                self.current_state = new_state
+        
+        
+        for i in range(len(self.train_x)):
+            print(str(self.train_x[i]) + " = " + str(self.train_y[i]))
+
+
+        model = hex_neural_network(np.array(self.train_x), np.array(self.train_y), len(self.n_x_n))
         model.train()
 
         if(self.plotter):
             tree_plot(test.current_state)
 
 
+    def reset_game(self, state, player):
+        self.current_player = player
+        self.current_state = state
 
 
 #     def play(self):    
@@ -184,5 +234,5 @@ class Game:
 
 
 if __name__ == "__main__":
-    while True:
-        new_game = Game(size = 4, play_type = 2, start_player = 1, plotter = False, simulations = 1000)
+    new_game = Game(size = 4, play_type = 2, start_player = 1, plotter = False, simulations = 1000, visualization=False)
+    new_game.create_dataset(number_of_games = 100)

@@ -5,7 +5,7 @@ if __name__ == "__main__":
     pr = cProfile.Profile()
     pr.enable()
 
-    Game(size = 4, play_type = 2, start_player = 1, plotter = False, simulations = 10000)
+    Game(size = 4, play_type = 2, start_player = 1, plotter = False, simulations = 10000, visualization = False)
 
     pr.disable()
     s = io.StringIO()

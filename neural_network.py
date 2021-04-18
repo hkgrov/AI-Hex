@@ -14,7 +14,10 @@ class hex_neural_network:
                 layers.Dense(grid_size, name="layer3"),
             ]
         )
-        self.model.compile(optimizer='adam', loss='mean_squared_error')
+        self.model.compile(
+            optimizer='adam',
+            loss='mean_squared_error'
+        )
 
     def train(self):
         self.model.fit(self.train_x, self.train_y, validation_split=0.2, epochs=30)

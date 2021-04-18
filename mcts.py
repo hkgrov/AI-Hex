@@ -97,7 +97,7 @@ class Mcts:
         for child in self.current_state.children:
             num_visits.append(child.num_visits + child.total_wins/self.simulations)
         indeks = num_visits.index(max(num_visits))
-        print(num_visits)
+        #print(num_visits)
 
         child_number = 0
         action_board = []
@@ -107,6 +107,6 @@ class Mcts:
                 child_number += 1
             else:
                 action_board.append(0) 
-        print(action_board)
+        #print(action_board)
 
         return self.current_state.children[indeks], action_board

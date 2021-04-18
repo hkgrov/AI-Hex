@@ -5,6 +5,7 @@ import numpy as np
 from statemanager import Stateman
 from mcts import Mcts
 from plotter import decision_tree_plot as tree_plot
+from neural_network import hex_neural_network
 
 BLACK = (0,0,0)
 WHITE = (255,255,255)
@@ -18,6 +19,8 @@ PLAYER_COLORS = [GREEN, RED]
 
 class Game:
     def __init__(self, size = 10, play_type = 1, start_player = 1, plotter = True, simulations = 1000):
+        self.train_x = []
+        self.train_y = []
         self.board = Board(size)
         self.simulations = simulations
         self.plotter = plotter
@@ -56,15 +59,27 @@ class Game:
 
 
     def ai_play(self):
-        while not self.stateman.is_terminal(self.n_x_n, self.current_player*-1):
+        while not self.stateman.is_terminal(self.current_state.grid, self.current_player*-1):
             test = Mcts(self.stateman, self.current_state, self.simulations)
-            new_state = test.run()
+            self.train_x.append(self.current_state.grid)
+
+            new_state, train_y = test.run()
+            self.train_y.append(train_y)
+            
             print(new_state.action)
-            self.n_x_n[new_state.action] = self.current_player
+            #self.n_x_n[new_state.action] = self.current_player
             self.board.auto_place_tile(new_state.action, self.current_player)
             self.current_player *= -1
             self.current_state = new_state
         
+        
+        for i in range(len(self.train_x)):
+            print(str(self.train_x[i]) + " = " + str(self.train_y[i]))
+
+
+        model = hex_neural_network(self.train_x, self.train_y, len(self.n_x_n))
+        model.train()
+
         if(self.plotter):
             tree_plot(test.current_state)
 
@@ -169,4 +184,5 @@ class Game:
 
 
 if __name__ == "__main__":
-    Game()
+    while True:
+        new_game = Game(size = 4, play_type = 2, start_player = 1, plotter = False, simulations = 1000)

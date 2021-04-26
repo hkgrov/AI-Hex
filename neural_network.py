@@ -9,7 +9,7 @@ class hex_neural_network:
     def __init__(self, grid_size):
         self.train_x = None
         self.train_y = None
-        self.grid_size = grid_size
+        self.grid_size = grid_size + 1
         self.model = keras.Sequential(
             [
                 layers.Dense(9, activation="tanh", input_shape=(self.grid_size,), name="layer1"),
@@ -19,14 +19,23 @@ class hex_neural_network:
         )
         self.model.compile(
             optimizer='adam',
-            loss='mean_squared_error'
+            loss='mean_squared_error',
+            metrics=["accuracy"]
         )
 
     def train(self):
         self.model.fit(self.train_x, self.train_y, validation_split=0.2, epochs=30)
 
-    def predict(self):
-        pass
+    def predict(self, grid):
+        print(grid)
+        prediction = self.model.predict(grid)
+        return prediction[0]
+
+    def save_model(self):
+        self.model.save("hex_model")
+
+    def load_model(self):
+        self.model = keras.models.load_model("hex_model")
 
     
     def preprocessing(self):
@@ -52,3 +61,4 @@ if __name__ == "__main__":
     network.load_dataset_from_csv()
     network.preprocessing()
     network.train()
+    network.save_model()

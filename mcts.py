@@ -106,7 +106,7 @@ class Mcts:
                 action_board.append(num_visits[child_number])
                 child_number += 1
             else:
-                action_board.append(0) 
+                action_board.append(0)
         #print(action_board)
 
         return self.current_state.children[indeks], action_board

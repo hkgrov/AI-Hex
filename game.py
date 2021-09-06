@@ -36,6 +36,44 @@ class Game:
         self.stateman = Stateman(state = self.current_state, size = size, grid = self.n_x_n, player = start_player)
 
 
+    def player_vs_ai(self):
+        hex_nn_agent = hex_neural_network(self.size)
+        hex_nn_agent.load_model()
+        taken_actions = []
+        conversion_array = [i + j  for j in range(self.size) for i in range(0, self.size*self.size, self.size)]
+
+        while not self.stateman.is_terminal(self.current_state.grid, self.current_player*-1):
+            if self.current_player == 1:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT: sys.exit()
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        valid, action = self.board.place_tile(COLORS[self.current_player])
+                        if(valid):
+                            taken_actions.append(action)
+                            self.n_x_n[action] = self.current_player
+                            self.current_player = self.current_player * -1
+                            self.current_state = State(self.n_x_n, self.current_player, self.current_state, action)
+            else:
+                new_grid = self.mirror_board(self.current_state.grid)
+                #new_grid = self.mirror_board([x / 10 for x  in self.current_state.grid])
+                prediction = hex_nn_agent.predict([new_grid])
+                print(prediction)
+                for action in taken_actions:
+                    prediction[conversion_array[action]] = 0
+
+                action = conversion_array[np.argmax(prediction)]
+
+
+                taken_actions.append(action)
+                self.n_x_n[action] = self.current_player
+                self.board.auto_place_tile(action, self.current_player)
+                self.current_player *= -1
+                self.current_state = State(self.n_x_n, self.current_player, self.current_state, action)
+
+
+        print(str(self.current_player) + " vant!!")
+        sys.exit()
+
     def manual_play(self):
         while True:
             for event in pygame.event.get():
@@ -68,6 +106,7 @@ class Game:
 
             if self.current_player == -1:
                 new_grid = self.mirror_board(self.current_state.grid)
+                #new_grid = self.mirror_board([x / 10 for x  in self.current_state.grid])
                 prediction = hex_nn_agent.predict([new_grid])
                 print(prediction)
                 for action in taken_actions:
@@ -77,6 +116,7 @@ class Game:
 
             else:
                 prediction = hex_nn_agent.predict([self.current_state.grid])
+                #prediction = hex_nn_agent.predict([[x / 10 for x in self.current_state.grid]])
                 print(prediction)
                 for action in taken_actions:
                     prediction[action] = 0
@@ -92,7 +132,7 @@ class Game:
                 self.board.auto_place_tile(action, self.current_player)
             self.current_player *= -1
             self.current_state = State(self.n_x_n, self.current_player, self.current_state, action)
-            #sleep(2)
+            sleep(2)
         if self.visualization:
             pygame.image.save(self.board.screen, "Screenshot.jpg")
 
@@ -227,4 +267,4 @@ if __name__ == "__main__":
     #new_game.manual_play()
     #new_game.ai_play()
     #new_game.create_dataset(number_of_games = 200)
-    new_game.neural_play()
+    new_game.player_vs_ai()

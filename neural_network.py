@@ -15,26 +15,22 @@ class hex_neural_network:
 
 
     def create_model(self):
-        try:
-            self.load_model()
-            print("Model loaded")
-        except:
-            print("No model created. Creating new model")
-            self.model = keras.Sequential(
-                [
-                    layers.Dense(6, activation="tanh", input_shape=(self.grid_size,), name="layer1"),
-                    layers.Dense(3, activation="tanh", name="layer2"),
-                    layers.Dense(self.grid_size, name="layer3"),
-                ]
-            )
-            self.model.compile(
-                optimizer='adam',
-                loss='mean_squared_error',
-                metrics=["accuracy"]
-            )
+        self.model = keras.Sequential(
+            [
+                layers.Dense(25, activation="relu", input_shape=(self.grid_size,), name="layer1"),
+                layers.Dense(20, activation="relu", name="layer2"),
+                layers.Dense(20, activation="softmax", name="layer3"),
+                layers.Dense(self.grid_size, name="layer4"),
+            ]
+        )
+        self.model.compile(
+            optimizer='adam',
+            loss='mean_squared_error',
+            metrics=["accuracy"]
+        )
 
     def train(self):
-        self.model.fit(self.train_x, self.train_y, validation_split=0.3, epochs=15)
+        self.model.fit(self.train_x, self.train_y, validation_split=0.3, epochs=500)
 
     def predict(self, grid):
         print(grid)
@@ -45,13 +41,20 @@ class hex_neural_network:
         self.model.save("hex_model_" + str(self.model_size))
 
     def load_model(self):
-        self.model = keras.models.load_model("hex_model_" + str(self.model_size))
+        try:
+            self.model = keras.models.load_model("hex_model_" + str(self.model_size))
+            print("Model loaded")
+        except:
+            print("No model created. Creating new model")
+            self.create_model()
+        
 
     
     def preprocessing(self):
         normalize = preprocessing.Normalization()
         normalize.adapt(self.train_x)
         self.train_y = pre.normalize(self.train_y, norm="l1")
+        print(self.train_x[5])
         print(self.train_y[0])
 
     

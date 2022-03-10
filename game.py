@@ -1,3 +1,4 @@
+from random import randint, random, sample
 import pygame, sys
 from board import Board
 from state import State
@@ -168,9 +169,13 @@ class Game:
     def create_dataset(self, number_of_games):
         #state_dict = {-1: State(self.n_x_n, -1, None), 1: State(self.n_x_n, 1, None)}
         #current_state = state_dict[self.current_player]
+        
         current_player = self.current_player
         for i in range(number_of_games):
-            current_state = State(self.n_x_n, self.current_player, None)
+            if(random() > 0.6):
+                current_state, current_player = self.create_rand_state()
+            else:
+                current_state = State(self.n_x_n, self.current_player, None)
             while not self.stateman.is_terminal(current_state.grid, self.current_player*-1):
                 mcts_runner = Mcts(self.stateman, current_state, self.simulations)
                 if self.current_player == -1:
@@ -204,6 +209,7 @@ class Game:
             writer = csv.writer(file)
             writer.writerows(self.train_y)
         
+        
         model = hex_neural_network(self.size)
         model.create_model()
         model.load_dataset_from_csv()
@@ -212,7 +218,20 @@ class Game:
         model.save_model()
 
 
-        
+    def create_rand_state(self):
+        players = [-1, 1]
+        grid = self.n_x_n.copy()
+
+        number_of_moves = randint(1, (self.size*2)-1)
+        start_player = players[randint(0,1)]
+        actions = sample(range(0, len(self.n_x_n)), number_of_moves)
+        for action in actions:
+            grid[action] = start_player
+            start_player *= -1
+
+        rand_state = State(grid, start_player, None, actions[-1])
+        print(grid)
+        return rand_state, start_player
 
     def train_neural_network(self, number_of_games):
         for i in range(number_of_games):
@@ -266,5 +285,5 @@ if __name__ == "__main__":
     new_game = Game(size = 5, play_type = 2, start_player = 1, plotter = False, simulations = 10000, visualization = True)
     #new_game.manual_play()
     #new_game.ai_play()
-    #new_game.create_dataset(number_of_games = 200)
+    #new_game.create_dataset(number_of_games = 1)
     new_game.player_vs_ai()
